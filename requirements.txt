@@ -4,3 +4,5 @@ numpy
 pandas
 google.generativeai
 matplotlib
+psycopg2-binary
+sqlalchemy
