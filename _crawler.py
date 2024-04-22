@@ -186,7 +186,7 @@ def get_content(url):
         author_and_date = soup.find('div', {'class': 'author'}).text
         author = author_and_date.split('&nbsp')[0].replace('By ', '')
         date = author_and_date.split('&nbsp')[1].split('|')[0].strip()
-        date = datetime.datetime.strptime(date, '%B %d, %Y').strftime("%Y-%m-%d")
+        date = datetime.datetime.strptime(date, '%B %d, %Y').strftime('%Y-%m-%d')
 
         # Find the text
         description = soup.find('span', {'class': 'lead_post_detail row'}).text
