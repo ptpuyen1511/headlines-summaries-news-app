@@ -7,6 +7,7 @@ from urllib.parse import urlparse, quote
 import posixpath
 import re
 from bs4 import BeautifulSoup
+import datetime
 
 class FilterURL(object):
     def __init__(self, urls=[], max_length = 128, confine=None, exclude=[]):
@@ -184,7 +185,8 @@ def get_content(url):
         # Find the date
         author_and_date = soup.find('div', {'class': 'author'}).text
         author = author_and_date.split('&nbsp')[0].replace('By ', '')
-        date = author_and_date.split('&nbsp')[1].split('|')[0]
+        date = author_and_date.split('&nbsp')[1].split('|')[0].strip()
+        date = datetime.datetime.strptime(date, '%B %d, %Y').strftime("%Y-%m-%d")
 
         # Find the text
         description = soup.find('span', {'class': 'lead_post_detail row'}).text
@@ -194,7 +196,7 @@ def get_content(url):
         # Create a dictionary to store the extracted information
         info = {
             'title': title.strip(),
-            'date': date.strip(),
+            'date': date,
             'text': text.strip(),
             'author': author.strip(),
             'category': url.split('/')[4],
