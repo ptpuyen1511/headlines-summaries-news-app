@@ -1,8 +1,10 @@
 import google.generativeai as genai
+import streamlit as st
+
+genai.configure(api_key=st.secrets['GOOGLE_API_KEY'])
 
 generation_config = {
-    'temperature': 0.9,
-    'top_k': 1,
+    'temperature': 0.7,
     'max_output_tokens': 2048,
 }
 

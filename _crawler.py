@@ -189,7 +189,7 @@ def get_content(url):
         # Find the text
         description = soup.find('span', {'class': 'lead_post_detail row'}).text
         paras = soup.find_all('p', {'class': 'Normal'})
-        text = description.strip() + '\n' + '\n'.join([p.text.strip() for p in paras])
+        text = description.strip() + '\n\n' + '\n\n'.join([p.text.strip() for p in paras])
 
         # Create a dictionary to store the extracted information
         info = {
