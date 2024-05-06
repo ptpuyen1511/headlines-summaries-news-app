@@ -7,10 +7,13 @@ My Streamlit-based news application utilizes ElasticSearch for powerful search c
 - [x] Step 2: Build a database with
     - Local: SQLite
     - Cloud: PostgreSQL or ElasticSearch (chose PostgreSQL on Neon)
-- [ ] Step 3: Code app using Streamlit
+- [x] Step 3: Code app using Streamlit
+    - [x] Wireframe
+    ![wireframe](./imgs/wireframe.excalidraw.png)
+    - [x] Code app with basic features (display news, summarize news, search news, classify news by category): [My Own News App (Powered by Streamlit)](https://my-own-news-app.streamlit.app/)
 - [ ] Step 4: Add some AI-powered features:
-    - TTS
-    - Classification
-    - Search news
-    - Trending keywords (in timeframe)
+    - [ ] TTS
+    - [x] Classification
+    - [x] Search news (string matching)
+    - [ ] Trending keywords (in timeframe)
  
