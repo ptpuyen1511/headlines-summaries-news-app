@@ -19,11 +19,11 @@ def create_insert_query(news_sample, summarized_text_sample):
                 f"SELECT '{news_sample['url']}', '{news_sample['title']}', '{news_sample['date']}', '{news_sample['author']}', '{news_sample['category']}', '{summarized_text_sample}'" + \
                 f"WHERE NOT EXISTS (SELECT 1 FROM NEWS WHERE url = '{news_sample['url']}')"
     
-    query_insert = "INSERT INTO news(url, title, date, author, category, summary) " + \
-                f"VALUES('{news_sample['url']}', '{news_sample['title']}', '{news_sample['date']}', '{news_sample['author']}', '{news_sample['category']}', '{summarized_text_sample}')"
+    # query_insert = "INSERT INTO news(url, title, date, author, category, summary) " + \
+    #             f"VALUES('{news_sample['url']}', '{news_sample['title']}', '{news_sample['date']}', '{news_sample['author']}', '{news_sample['category']}', '{summarized_text_sample}')"
     
-    if datetime.strptime(news_sample['date'], '%Y-%m-%d').date() == datetime.today().date():
-        return query_insert
+    # if datetime.strptime(news_sample['date'], '%Y-%m-%d').date() == datetime.today().date():
+    #     return query_insert
     
     return query_insert_check
 
