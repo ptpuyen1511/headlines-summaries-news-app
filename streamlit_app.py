@@ -4,6 +4,7 @@ import _streamlit_db_helper as db_helper
 import _streamlit_theme as theme
 from sqlalchemy import URL, create_engine
 from datetime import datetime, timedelta
+from _crawl_and_store import crawl_each_day
 import threading
 import time
 import os
@@ -60,15 +61,13 @@ def display_brief_news(container, news):
 # Try thread
 def do_task():
     while True:
-        os.write(1, b'Hello world\n')
-        time.sleep(5)
+        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        crawl_each_day()
+        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
+        time.sleep(3600*24)
 
-
-
-# th = threading.Thread(target=do_task)
-# th.start()
-
-
+th = threading.Thread(target=do_task)
+th.start()
 
 # Dashboard Main Panel
 st.markdown('<h2 style="text-align: center; color: white; background-color: #002366;">VNExpress News Summaries</h2>', unsafe_allow_html=True)

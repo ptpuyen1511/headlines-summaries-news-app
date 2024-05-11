@@ -3,6 +3,7 @@ from _summarizer import create_model, summarize
 from sqlalchemy import URL, create_engine, text
 import streamlit as st
 from datetime import datetime
+import os
 
 connection_string = URL.create(
     'postgresql',
@@ -52,7 +53,7 @@ def crawl_each_day():
                 # Summarize
                 summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
             except:
-                print('Error when processing ', link)
+                os.write(1, f'Error when processing {link}\n'.encode('utf-8'))
                 continue
 
             # Format
@@ -64,7 +65,7 @@ def crawl_each_day():
 
             # Insert data
             conn.execute(text(query))
-            print(link)
+            os.write(1, f'{link}\n'.encode('utf-8'))
 
     # Commit
     conn.commit()
