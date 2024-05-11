@@ -4,6 +4,9 @@ import _streamlit_db_helper as db_helper
 import _streamlit_theme as theme
 from sqlalchemy import URL, create_engine
 from datetime import datetime, timedelta
+import threading
+import time
+import os
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
@@ -54,6 +57,19 @@ def display_brief_news(container, news):
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
 # Page content ---------------------------------------------------------------------------------------------------------------------
+# Try thread
+def do_task():
+    while True:
+        os.write(1, b'Hello world\n')
+        time.sleep(5)
+
+
+
+th = threading.Thread(target=do_task)
+th.start()
+
+
+
 # Dashboard Main Panel
 st.markdown('<h2 style="text-align: center; color: white; background-color: #002366;">VNExpress News Summaries</h2>', unsafe_allow_html=True)
 st.write('')
