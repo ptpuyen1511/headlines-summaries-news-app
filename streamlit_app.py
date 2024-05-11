@@ -65,8 +65,8 @@ def do_task():
 
 
 
-th = threading.Thread(target=do_task)
-th.start()
+# th = threading.Thread(target=do_task)
+# th.start()
 
 
 
