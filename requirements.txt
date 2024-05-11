@@ -5,3 +5,4 @@ google.generativeai
 matplotlib
 psycopg2-binary
 sqlalchemy
+beautifulsoup4
