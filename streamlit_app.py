@@ -62,7 +62,7 @@ st.write('')
 # Read database
 all_news_df = connect_and_get_data()
 today = datetime.today().date()
-within_a_week_ori_df = all_news_df[today - timedelta(days=7) < all_news_df['date']].sort_values(by='date', ascending=False)
+within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['date']].sort_values(by='date', ascending=False)
 
 
 # News column
