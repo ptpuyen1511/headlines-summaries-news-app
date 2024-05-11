@@ -34,6 +34,20 @@ st.set_page_config(page_title='News Summaries', page_icon=':newspaper:', layout=
 style = """<style>""" + theme.get_block_style() + theme.get_tabs_style() + """</style>"""
 st.markdown(style, unsafe_allow_html=True)
 
+
+# Thread for daily news crawling---------------------------------------------------------------------------------------------------
+def do_task():
+    while True:
+        os.write(1, 'Crawling...\n'.encode('utf-8'))
+        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        crawl_each_day()
+        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
+        time.sleep(3600*24)
+
+th = threading.Thread(target=do_task)
+th.start()
+
+
 # Utility functions ----------------------------------------------------------------------------------------------------------------
 def get_h5_news_style(text):
     return f'<h5 style="text-align: left; color: #002366;">{text}</h5>'
@@ -58,16 +72,6 @@ def display_brief_news(container, news):
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
 # Page content ---------------------------------------------------------------------------------------------------------------------
-# Try thread
-def do_task():
-    while True:
-        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
-        crawl_each_day()
-        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
-        time.sleep(3600*24)
-
-th = threading.Thread(target=do_task)
-th.start()
 
 # Dashboard Main Panel
 st.markdown('<h2 style="text-align: center; color: white; background-color: #002366;">VNExpress News Summaries</h2>', unsafe_allow_html=True)
