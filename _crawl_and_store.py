@@ -33,32 +33,38 @@ def crawl_each_day():
     conn = engine.connect()
 
     # Get all today links
-    today_links = get_all_links()
+    today_links_dict = get_all_links()
 
     # Create summamerizer model
     summarizer_model = create_model('gemini-1.0-pro')
 
-    for link in today_links:
-        try:
-            # Crawl
-            news_sample = get_content(link)
+    for category in today_links_dict:
+        today_links = today_links_dict[category]
 
-            # Summarize
-            summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
-        except:
-            print('Error when processing ', link)
-            continue
+        print(category)
+        print(today_links)
 
-        # Format
-        summarized_text_sample = summarized_text_sample.replace("'", "''").replace('"', '')
-        news_sample['title'] = news_sample['title'].replace("'", "''").replace('"', '')
+        for link in today_links:
+            try:
+                # Crawl
+                news_sample = get_content(link, category)
 
-        # Create query
-        query = create_insert_query(news_sample, summarized_text_sample)
+                # Summarize
+                summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
+            except:
+                print('Error when processing ', link)
+                continue
 
-        # Insert data
-        conn.execute(text(query))
-        print(link)
+            # Format
+            summarized_text_sample = summarized_text_sample.replace("'", "''").replace('"', '')
+            news_sample['title'] = news_sample['title'].replace("'", "''").replace('"', '')
+
+            # Create query
+            query = create_insert_query(news_sample, summarized_text_sample)
+
+            # Insert data
+            conn.execute(text(query))
+            print(link)
 
     # Commit
     conn.commit()

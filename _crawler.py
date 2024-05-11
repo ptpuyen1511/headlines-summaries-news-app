@@ -134,7 +134,7 @@ def get_all_links(urls=['https://e.vnexpress.net/news/news', 'https://e.vnexpres
         links (list): A list of all links
     '''
 
-    links = []
+    links = {}
 
     for seek in urls:
         # Send a GET request to the URL and get the response
@@ -143,19 +143,23 @@ def get_all_links(urls=['https://e.vnexpress.net/news/news', 'https://e.vnexpres
         # Parse the HTML content of the response using BeautifulSoup
         soup = BeautifulSoup(response.content, 'html.parser')
 
+        cate_urls = []
+
         # Get links from page
         tags = soup('a')
         for tag in tags:
             url = tag.get('href')
-            if url is not None and url.startswith(seek):
-                if url not in links:
-                    links.append(url)
+            if url is not None and url.startswith('https://e.vnexpress.net/news/'):
+                if url not in cate_urls:
+                    cate_urls.append(url)
         
+        cate_urls = FilterURL(cate_urls).get_okurls()
+        links[seek.split('/')[-1]] = cate_urls
 
-    return FilterURL(links).get_okurls()
+    return links
 
 
-def get_content(url):
+def get_content(url, category='news'):
     '''
     Get the content of the url
     The response from the URL is parsed into a dictionary containing the extracted information
@@ -199,7 +203,7 @@ def get_content(url):
             'date': date,
             'text': text.strip(),
             'author': author.strip(),
-            'category': url.split('/')[4],
+            'category': category,
             'url': url,
             'is_valid': True
         }

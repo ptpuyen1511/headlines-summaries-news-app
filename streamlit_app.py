@@ -82,7 +82,7 @@ with col1:
     else:
         within_a_week_df = within_a_week_ori_df.copy()
 
-    all_tab, news_tab, world_tab, sport_tab = container.tabs(['All', 'News', 'World', 'Sport'])
+    all_tab, news_tab, world_tab, sport_tab = container.tabs(['All', 'News', 'World', 'Sports'])
 
     with all_tab:
         st.markdown(get_h5_news_style('All News within a Week'), unsafe_allow_html=True) 
@@ -105,7 +105,7 @@ with col1:
             display_brief_news(news_container, row)
 
     with sport_tab:
-        st.markdown(get_h5_news_style('Sport News within a Week'), unsafe_allow_html=True)
+        st.markdown(get_h5_news_style('Sports News within a Week'), unsafe_allow_html=True)
         sports_within_a_week_df = within_a_week_df[within_a_week_df['category'] == 'sports']
         for _, row in sports_within_a_week_df.iterrows():
             news_container = st.container(border=True)
