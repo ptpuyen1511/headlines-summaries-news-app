@@ -42,7 +42,7 @@ def show_full_news(news):
     st.markdown(f'<div style="text-align: right;">Category: {news["category"].title()}</div>', unsafe_allow_html=True)
     st.markdown(get_horizontal_line_style(height=.5, border=.5), unsafe_allow_html=True)
     st.markdown(news['summary'], unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align: right;">By {news["author"]} - {news["date"]}</div>', unsafe_allow_html=True)
+    st.markdown(f'<div style="text-align: right;">By {news["author"]} - {news["date"]} PT</div>', unsafe_allow_html=True)
     st.markdown(f'<a href="{news["url"]}">Read full news</a>', unsafe_allow_html=True)
 
 def display_brief_news(container, news):
@@ -50,7 +50,7 @@ def display_brief_news(container, news):
     with container.popover(news['title']):
         show_full_news(news)
 
-    container.markdown(f'_By **{news["author"]}** on **{news["date"]}**_')
+    container.markdown(f'_By **{news["author"]}** on **{news["date"]} PT**_')
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
 # Page content ---------------------------------------------------------------------------------------------------------------------
@@ -82,7 +82,7 @@ with col1:
     else:
         within_a_week_df = within_a_week_ori_df.copy()
 
-    all_tab, news_tab, world_tab, life_tab = container.tabs(['All', 'News', 'World', 'Life'])
+    all_tab, news_tab, world_tab, sport_tab = container.tabs(['All', 'News', 'World', 'Sport'])
 
     with all_tab:
         st.markdown(get_h5_news_style('All News within a Week'), unsafe_allow_html=True) 
@@ -104,10 +104,10 @@ with col1:
             news_container = st.container(border=True)
             display_brief_news(news_container, row)
 
-    with life_tab:
-        st.markdown(get_h5_news_style('Life News within a Week'), unsafe_allow_html=True)
-        life_within_a_week_df = within_a_week_df[within_a_week_df['category'] == 'life']
-        for _, row in life_within_a_week_df.iterrows():
+    with sport_tab:
+        st.markdown(get_h5_news_style('Sport News within a Week'), unsafe_allow_html=True)
+        sports_within_a_week_df = within_a_week_df[within_a_week_df['category'] == 'sports']
+        for _, row in sports_within_a_week_df.iterrows():
             news_container = st.container(border=True)
             display_brief_news(news_container, row)
 
