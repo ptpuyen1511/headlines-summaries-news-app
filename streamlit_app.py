@@ -3,7 +3,8 @@ import pandas as pd
 import _streamlit_db_helper as db_helper
 import _streamlit_theme as theme
 from sqlalchemy import URL, create_engine
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timedelta
+import pytz
 from _crawl_and_store import crawl_each_day
 import _constant
 import threading
@@ -38,7 +39,7 @@ st.markdown(style, unsafe_allow_html=True)
 
 # Thread for daily news crawling---------------------------------------------------------------------------------------------------
 def get_cur_time_gmt7() -> datetime:
-    now = datetime.now().astimezone(timezone('Asia/Ho_Chi_Minh'))
+    now = datetime.now().astimezone(pytz.timezone('Asia/Ho_Chi_Minh'))
     return now
 
 
