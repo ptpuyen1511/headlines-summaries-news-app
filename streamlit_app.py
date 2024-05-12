@@ -61,17 +61,21 @@ def do_crawl():
         os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
 
 
-def do_task():
-    while True:
-        crawl_time = datetime.now()
-        os.write(1, f'Testing time: {crawl_time}\n'.encode('utf-8'))
-        time.sleep(10)
+def do_crawl_wrapper():
+    try:
+        do_crawl()
+    except Exception as e:
+        os.write(1, f'Error when crawling: {str(e)}\n'.encode('utf-8'))
 
-th = threading.Thread(target=do_crawl, daemon=True)
+
+# def do_task():
+#     while True:
+#         crawl_time = datetime.now()
+#         os.write(1, f'Testing time: {crawl_time}\n'.encode('utf-8'))
+#         time.sleep(10)
+
+th = threading.Thread(target=do_crawl_wrapper, daemon=True)
 th.start()
-
-th2 = threading.Thread(target=do_task, daemon=True)
-th2.start()
 
 
 # Utility functions ----------------------------------------------------------------------------------------------------------------
