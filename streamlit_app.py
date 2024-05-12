@@ -67,8 +67,11 @@ def do_task():
         os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
         time.sleep(10)
 
-th = threading.Thread(target=do_crawl)
+th = threading.Thread(target=do_crawl, daemon=True)
 th.start()
+
+th2 = threading.Thread(target=do_task, daemon=True)
+th2.start()
 
 
 # Utility functions ----------------------------------------------------------------------------------------------------------------
