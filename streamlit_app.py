@@ -46,7 +46,7 @@ def do_crawl():
 
 def do_task():
     while True:
-        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        crawl_time = datetime.now()
         os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
         time.sleep(10)
 
