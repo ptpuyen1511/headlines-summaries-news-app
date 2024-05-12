@@ -3,8 +3,9 @@ import pandas as pd
 import _streamlit_db_helper as db_helper
 import _streamlit_theme as theme
 from sqlalchemy import URL, create_engine
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from _crawl_and_store import crawl_each_day
+import _constant
 import threading
 import time
 import os
@@ -36,13 +37,28 @@ st.markdown(style, unsafe_allow_html=True)
 
 
 # Thread for daily news crawling---------------------------------------------------------------------------------------------------
+def get_cur_time_gmt7() -> datetime:
+    now = datetime.now().astimezone(timezone('Asia/Ho_Chi_Minh'))
+    return now
+
+
+def wait_until_gmt7(hour: int, min: int):
+    while True:
+        time.sleep(60)
+        now = get_cur_time_gmt7()
+        if now.hour == hour and now.minute == min:
+            return
+
+
 def do_crawl():
     while True:
-        os.write(1, 'Crawling...\n'.encode('utf-8'))
-        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+        begin_crawl_time = get_cur_time_gmt7()
+        os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
         crawl_each_day()
-        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
-        time.sleep(3600*24)
+        end_crawl_time = get_cur_time_gmt7()
+        os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
+
 
 def do_task():
     while True:
