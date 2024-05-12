@@ -64,7 +64,7 @@ def do_crawl():
 def do_task():
     while True:
         crawl_time = datetime.now()
-        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
+        os.write(1, f'Testing time: {crawl_time}\n'.encode('utf-8'))
         time.sleep(10)
 
 th = threading.Thread(target=do_crawl, daemon=True)
