@@ -36,16 +36,22 @@ st.markdown(style, unsafe_allow_html=True)
 
 
 # Thread for daily news crawling---------------------------------------------------------------------------------------------------
-# def do_task():
-#     while True:
-#         os.write(1, 'Crawling...\n'.encode('utf-8'))
-#         crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
-#         crawl_each_day()
-#         os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
-#         time.sleep(3600*24)
+def do_crawl():
+    while True:
+        os.write(1, 'Crawling...\n'.encode('utf-8'))
+        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        crawl_each_day()
+        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
+        time.sleep(3600*24)
 
-# th = threading.Thread(target=do_task)
-# th.start()
+def do_task():
+    while True:
+        crawl_time = time.strftime('%l:%M%p %Z on %b %d, %Y')
+        os.write(1, f'Last time crawl: {crawl_time}\n'.encode('utf-8'))
+        time.sleep(10)
+
+th = threading.Thread(target=do_task)
+th.start()
 
 
 # Utility functions ----------------------------------------------------------------------------------------------------------------
