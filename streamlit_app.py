@@ -20,7 +20,7 @@ connection_string = URL.create(
     database=st.secrets.connections.postgresql.database,
     query={'options':'endpoint=ep-sweet-cloud-a1zh9huf'}
 )
-engine = create_engine(connection_string, connect_args={'sslmode':'require'}, pool_pre_ping=True, pool_recycle=7200)
+engine = create_engine(connection_string, connect_args={'sslmode':'require'}, pool_pre_ping=True, pool_recycle=3600)
 
 def connect_and_get_data():
     conn = engine.connect()
@@ -56,7 +56,7 @@ def do_crawl():
         wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
         begin_crawl_time = get_cur_time_gmt7()
         os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
-        crawl_each_day()
+        crawl_each_day(engine)
         end_crawl_time = get_cur_time_gmt7()
         os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
 

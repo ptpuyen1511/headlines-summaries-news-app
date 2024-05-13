@@ -28,9 +28,9 @@ def create_insert_query(news_sample, summarized_text_sample):
     return query_insert_check
 
 
-def crawl_each_day():
+def crawl_each_day(engine):
     # Connect to DB server
-    engine = create_engine(connection_string, connect_args={'sslmode':'require'}, pool_pre_ping=True, pool_recycle=3600)
+    # engine = create_engine(connection_string, connect_args={'sslmode':'require'}, pool_pre_ping=True, pool_recycle=3600)
     conn = engine.connect()
 
     # Get all today links
