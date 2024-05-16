@@ -42,8 +42,8 @@ def crawl_each_day(engine):
     for category in today_links_dict:
         today_links = today_links_dict[category]
 
-        print(category)
-        print(today_links)
+        # print(category)
+        # print(today_links)
 
         for link in today_links:
             try:

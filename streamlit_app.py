@@ -90,9 +90,29 @@ def do_crawl():
         print_instance_state()
         begin_crawl_time = get_cur_time_gmt7()
         os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
-        crawl_each_day(engine)
-        end_crawl_time = get_cur_time_gmt7()
-        os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
+        # crawl_each_day(engine)
+        # end_crawl_time = get_cur_time_gmt7()
+        # os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
+
+
+is_crawling = False
+
+def do_crawl_manual():
+    global is_crawling
+    if is_crawling:
+        return
+    
+    is_crawling = True
+    
+    print_instance_state()
+    begin_crawl_time = get_cur_time_gmt7()
+    os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
+    crawl_each_day(engine)
+    end_crawl_time = get_cur_time_gmt7()
+    os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
+    
+    is_crawling = False
+
 
 
 def do_crawl_wrapper():
@@ -101,12 +121,6 @@ def do_crawl_wrapper():
     except Exception as e:
         os.write(1, f'Error when crawling: {str(e)}\n'.encode('utf-8'))
 
-
-# def do_task():
-#     while True:
-#         crawl_time = datetime.now()
-#         os.write(1, f'Testing time: {crawl_time}\n'.encode('utf-8'))
-#         time.sleep(10)
 
 th = threading.Thread(target=do_crawl_wrapper, daemon=True)
 th.start()
@@ -151,6 +165,8 @@ within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['dat
 # News column
 col1, col2 = st.columns([4, 1])
 
+
+
 with col1:
     container = st.container(border=False)
     container.markdown('<h3 style="text-align: left; color: #002366; ">List of News</h4>', unsafe_allow_html=True)
@@ -158,6 +174,12 @@ with col1:
 
     # Search bar
     search_term = container.text_input(':mag_right: Search for news articles:', placeholder='weather')
+
+    # Button manual crawl
+    crawl_button = container.button('Crawl news')
+    if crawl_button and not is_crawling:
+        th2 = threading.Thread(target=do_crawl_manual, daemon=True)
+        th2.start()
 
     if search_term:
         mask = within_a_week_ori_df.map(lambda x: search_term.lower() in str(x).lower()).any(axis=1)
