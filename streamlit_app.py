@@ -50,6 +50,13 @@ def wait_until_gmt7(hour: int, min: int):
         now = get_cur_time_gmt7()
         if now.hour == hour and now.minute == min:
             return
+        
+def wait_until_next_hour():
+    while True:
+        time.sleep(60)
+        now = get_cur_time_gmt7()
+        if now.minute == 53:
+            return
 
 def print_instance_state():
     pid = os.getpid()
@@ -72,7 +79,8 @@ def print_instance_state():
 
 def do_crawl():
     while True:
-        wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+        # wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+        wait_until_next_hour()
         print_instance_state()
         begin_crawl_time = get_cur_time_gmt7()
         os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
