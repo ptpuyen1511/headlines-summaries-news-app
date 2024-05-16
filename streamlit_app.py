@@ -51,22 +51,29 @@ def wait_until_gmt7(hour: int, min: int):
         if now.hour == hour and now.minute == min:
             return
 
-def get_instance_state():
+def print_instance_state():
     pid = os.getpid()
     tid = threading.get_native_id()
     tid2 = threading.current_thread().ident
-    cmdret = subprocess.run([f'hostname -I'], shell=True)
+    cmdret = subprocess.run(f'hostname -I', shell=True, capture_output = True)
     hostnames = cmdret.stdout.decode('utf-8')
     # cmdret.stderr.decode('utf-8')
-    cmdret = subprocess.run([f'ip link show'], shell=True)
+    cmdret = subprocess.run(f'ip link show', shell=True, capture_output = True)
     hostnames2 = cmdret.stdout.decode('utf-8')
 
-    os.write(1, f'INSTANCE STATE: pid={pid}, tid={tid}, tid2={tid2}\n hostnames={hostnames}\n hostnames2={hostnames2}\n'.encode('utf-8'))
+    cmdret = subprocess.run(f'ps -p {pid} --no-header -o uid,pid,cmd', shell=True, capture_output = True)
+    proc_info = cmdret.stdout.decode('utf-8')
+
+    res1 = f'INSTANCE STATE: pid={pid}, tid={tid}, tid2={tid2}\n hostnames={hostnames}\n hostnames2={hostnames2}\n'
+    res2 = f'PROC_INFO: {proc_info}\n'
+    res = (res1 + res2 + '\n').encode('utf-8')
+    os.write(1, res)
 
 
 def do_crawl():
     while True:
         wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+        print_instance_state()
         begin_crawl_time = get_cur_time_gmt7()
         os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
         crawl_each_day(engine)
