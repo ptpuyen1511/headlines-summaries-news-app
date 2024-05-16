@@ -10,6 +10,7 @@ import _constant
 import threading
 import time
 import os
+import subprocess
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
@@ -49,6 +50,18 @@ def wait_until_gmt7(hour: int, min: int):
         now = get_cur_time_gmt7()
         if now.hour == hour and now.minute == min:
             return
+
+def get_instance_state():
+    pid = os.getpid()
+    tid = threading.get_native_id()
+    tid2 = threading.current_thread().ident
+    cmdret = subprocess.run([f'hostname -I'], shell=True)
+    hostnames = cmdret.stdout.decode('utf-8')
+    # cmdret.stderr.decode('utf-8')
+    cmdret = subprocess.run([f'ip link show'], shell=True)
+    hostnames2 = cmdret.stdout.decode('utf-8')
+
+    os.write(1, f'INSTANCE STATE: pid={pid}, tid={tid}, tid2={tid2}\n hostnames={hostnames}\n hostnames2={hostnames2}\n'.encode('utf-8'))
 
 
 def do_crawl():
