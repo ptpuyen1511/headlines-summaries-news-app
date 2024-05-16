@@ -55,7 +55,7 @@ def wait_until_next_hour():
     while True:
         time.sleep(60)
         now = get_cur_time_gmt7()
-        if now.minute == 53:
+        if now.minute == 3:
             return
 
 def print_instance_state():
@@ -71,9 +71,15 @@ def print_instance_state():
     cmdret = subprocess.run(f'ps -p {pid} --no-header -o uid,pid,cmd', shell=True, capture_output = True)
     proc_info = cmdret.stdout.decode('utf-8')
 
+    cmdret = subprocess.run(f'strings /proc/{pid}/cmdline', shell=True, capture_output = True)
+    proc_cmdline = cmdret.stdout.decode('utf-8').splitlines()
+    cmdret = subprocess.run(f'whoami', shell=True, capture_output = True)
+    proc_uid_owner = cmdret.stdout.decode('utf-8').strip()
+
     res1 = f'INSTANCE STATE: pid={pid}, tid={tid}, tid2={tid2}\n hostnames={hostnames}\n hostnames2={hostnames2}\n'
     res2 = f'PROC_INFO: {proc_info}\n'
-    res = (res1 + res2 + '\n').encode('utf-8')
+    res3 = f'PROC_INFO2: uid={proc_uid_owner}, cmdline={proc_cmdline}\n'
+    res = (res1 + res2 + res3 + '\n').encode('utf-8')
     os.write(1, res)
 
 
