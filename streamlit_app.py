@@ -11,6 +11,8 @@ import threading
 import time
 import os
 import subprocess
+import _global_vars
+from ulogging import do_log
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
@@ -79,51 +81,50 @@ def print_instance_state():
     res1 = f'INSTANCE STATE: pid={pid}, tid={tid}, tid2={tid2}\n hostnames={hostnames}\n hostnames2={hostnames2}\n'
     res2 = f'PROC_INFO: {proc_info}\n'
     res3 = f'PROC_INFO2: uid={proc_uid_owner}, cmdline={proc_cmdline}\n'
-    res = (res1 + res2 + res3 + '\n').encode('utf-8')
-    os.write(1, res)
+
+    res = res1 + res2 + res3
+    do_log(res)
 
 
-def do_crawl():
-    while True:
-        # wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
-        wait_until_next_hour()
-        print_instance_state()
-        begin_crawl_time = get_cur_time_gmt7()
-        os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
-        # crawl_each_day(engine)
-        # end_crawl_time = get_cur_time_gmt7()
-        # os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
-
-
-is_crawling = False
-
-def do_crawl_manual():
-    global is_crawling
-    if is_crawling:
-        return
-    
-    is_crawling = True
-    
-    print_instance_state()
-    begin_crawl_time = get_cur_time_gmt7()
-    os.write(1, f'Begin crawling at {str(begin_crawl_time)}\n'.encode('utf-8'))
-    crawl_each_day(engine)
-    end_crawl_time = get_cur_time_gmt7()
-    os.write(1, f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}\n'.encode('utf-8'))
-    
-    is_crawling = False
-
-
-
-def do_crawl_wrapper():
+def do_crawl(crawling_state: _global_vars.CrawlingState, type_crawl: str):
     try:
-        do_crawl()
+        if crawling_state.is_crawling:
+            do_log(f'Already crawling, crawling state: {crawling_state}')
+            return
+        
+        crawling_state.set(True, type_crawl, threading.get_native_id())
+
+        # print_instance_state()
+
+        begin_crawl_time = get_cur_time_gmt7()
+        do_log(f'Begin crawling at {str(begin_crawl_time)}, crawling state: {crawling_state}')
+
+        crawl_each_day(engine)
+
+        end_crawl_time = get_cur_time_gmt7()
+        do_log(f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}, crawling state: {crawling_state}')
+
+        crawling_state.set(False, '', -1)
+
     except Exception as e:
-        os.write(1, f'Error when crawling: {str(e)}\n'.encode('utf-8'))
+        do_log(f'Error when crawling: {str(e)}, crawling state: {crawling_state}')
 
 
-th = threading.Thread(target=do_crawl_wrapper, daemon=True)
-th.start()
+
+def do_auto_crawl(crawling_state: _global_vars.CrawlingState):
+    while True:
+        wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+        do_crawl(crawling_state, 'auto')
+
+
+def do_manual_crawl(crawling_state: _global_vars.CrawlingState):
+    do_crawl(crawling_state, 'manual')
+
+
+if not _global_vars.initialized:
+    _global_vars.initialized = True
+    th = threading.Thread(target=do_auto_crawl, args=(_global_vars.crawling_state,), daemon=True)
+    th.start()
 
 
 # Utility functions ----------------------------------------------------------------------------------------------------------------
@@ -166,7 +167,6 @@ within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['dat
 col1, col2 = st.columns([4, 1])
 
 
-
 with col1:
     container = st.container(border=False)
     container.markdown('<h3 style="text-align: left; color: #002366; ">List of News</h4>', unsafe_allow_html=True)
@@ -177,8 +177,8 @@ with col1:
 
     # Button manual crawl
     crawl_button = container.button('Crawl news')
-    if crawl_button and not is_crawling:
-        th2 = threading.Thread(target=do_crawl_manual, daemon=True)
+    if crawl_button:
+        th2 = threading.Thread(target=do_manual_crawl, args=(_global_vars.crawling_state,), daemon=True)
         th2.start()
 
     if search_term:
