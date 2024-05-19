@@ -87,15 +87,14 @@ def print_instance_state():
 
 
 def do_crawl(crawling_state: _global_vars.CrawlingState, type_crawl: str):
+    if crawling_state.is_crawling:
+        do_log(f'Already crawling, crawling state: {crawling_state}')
+        return
+    
     try:
-        if crawling_state.is_crawling:
-            do_log(f'Already crawling, crawling state: {crawling_state}')
-            return
-        
         crawling_state.set(True, type_crawl, threading.get_native_id())
 
         # print_instance_state()
-
         begin_crawl_time = get_cur_time_gmt7()
         do_log(f'Begin crawling at {str(begin_crawl_time)}, crawling state: {crawling_state}')
 
@@ -104,10 +103,11 @@ def do_crawl(crawling_state: _global_vars.CrawlingState, type_crawl: str):
         end_crawl_time = get_cur_time_gmt7()
         do_log(f'Finish crawling at {str(end_crawl_time)}, duration={end_crawl_time - begin_crawl_time}, crawling state: {crawling_state}')
 
-        crawling_state.set(False, '', -1)
-
     except Exception as e:
         do_log(f'Error when crawling: {str(e)}, crawling state: {crawling_state}')
+
+    finally:
+        crawling_state.set(False, '', -1)
 
 
 
