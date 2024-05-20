@@ -12,7 +12,7 @@ import time
 import os
 import subprocess
 import _global_vars
-from ulogging import do_log
+from _ulogging import do_log
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
