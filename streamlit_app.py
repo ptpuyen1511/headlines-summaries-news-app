@@ -13,6 +13,7 @@ import os
 import subprocess
 import _global_vars
 from _ulogging import do_log
+import _tts
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
@@ -134,19 +135,39 @@ def get_h5_news_style(text):
 def get_horizontal_line_style(height=1, border=1):
     return f'<hr style="margin-top: 0; margin-bottom: 0; height: {height}px; border: {border}px solid #002366;"><br>'
 
-def show_full_news(news):
-    st.markdown(f'<h3 style="text-aling: center; font-size: 20px; color: #002366;">{news["title"]}</h3>', unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align: right;">Category: {news["category"].title()}</div>', unsafe_allow_html=True)
-    st.markdown(get_horizontal_line_style(height=.5, border=.5), unsafe_allow_html=True)
-    st.markdown(news['summary'], unsafe_allow_html=True)
-    st.markdown(f'<div style="text-align: right;">By {news["author"]} - {news["date"]} PT</div>', unsafe_allow_html=True)
-    st.markdown(f'<a href="{news["url"]}">Read full news</a>', unsafe_allow_html=True)
+
+id_tts_button = 0
+
+def increase_id_tts_button():
+    global id_tts_button
+    id_tts_button += 1
+    return id_tts_button
+
+
+def show_full_news(container, news):
+    # TTS button
+    col1, col2, _ = container.columns(3)
+    col1.button('🔊 Read this article', key=increase_id_tts_button(), on_click=_tts.speak, args=(news['summary'], col2))
+
+    with container:
+        st.markdown(f'<h3 style="text-aling: center; font-size: 20px; color: #002366;">{news["title"]}</h3>', unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: right;">Category: {news["category"].title()}</div>', unsafe_allow_html=True)
+        st.markdown(get_horizontal_line_style(height=.5, border=.5), unsafe_allow_html=True)
+        st.markdown(news['summary'], unsafe_allow_html=True)
+        st.markdown(f'<div style="text-align: right;">By {news["author"]} - {news["date"]} PT</div>', unsafe_allow_html=True)
+        st.markdown(f'<a href="{news["url"]}">Read full news</a>', unsafe_allow_html=True)
 
 def display_brief_news(container, news):
     # Full summarized news
     with container.popover(news['title']):
-        show_full_news(news)
+        full_container = st.container(border=False)
+        show_full_news(full_container, news)
 
+    # TTS button
+    col1, col2, _ = container.columns(3)
+    col1.button('🔊 Read this article', key=increase_id_tts_button(), on_click=_tts.speak, args=(news['summary'], col2))
+
+    # Brief news
     container.markdown(f'_By **{news["author"]}** on **{news["date"]} PT**_')
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
@@ -176,7 +197,8 @@ with col1:
     search_term = container.text_input(':mag_right: Search for news articles:', placeholder='weather')
 
     # Button manual crawl
-    crawl_button = container.button('Crawl news')
+    _, crawl_col, _ = container.columns(3)
+    crawl_button = crawl_col.button('Manually crawl news')
     if crawl_button:
         th2 = threading.Thread(target=do_manual_crawl, args=(_global_vars.crawling_state,), daemon=True)
         th2.start()
