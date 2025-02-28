@@ -38,7 +38,7 @@ def crawl_each_day(engine):
     today_links_dict = get_all_links()
 
     # Create summarizer model
-    summarizer_model = create_model('gemini-1.5-pro')
+    summarizer_model = create_model('gemini-1.5-flash')
 
     for category in today_links_dict:
         today_links = today_links_dict[category]
@@ -51,8 +51,8 @@ def crawl_each_day(engine):
                 # Crawl
                 news_sample = get_content(link, category)
 
-                # Wait to avoid being exceeded the limit (4M tokens per min)
-                time.sleep(30)
+                # Wait to avoid being exceeded the limits ( RPM of 2,000 and TPM of 4,000,000)
+                time.sleep(10)
 
                 # Summarize
                 summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
