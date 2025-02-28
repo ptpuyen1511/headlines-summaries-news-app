@@ -51,11 +51,11 @@ def crawl_each_day(engine):
                 # Crawl
                 news_sample = get_content(link, category)
 
-                # Summarize
-                summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
-
                 # Wait to avoid being exceeded the limit (4M tokens per min)
                 time.sleep(30)
+
+                # Summarize
+                summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
             except Exception as e:
                 os.write(1, f'{e}\n'.encode('utf-8'))
                 
