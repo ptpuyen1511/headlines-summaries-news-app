@@ -34,5 +34,5 @@ def create_model(model_name):
 
 def summarize(model, full_text):
     prompt = 'Summarize the following text WITHOUT using narrative tone:\n\n' + full_text
-    respone = model.generate_content(prompt)
-    return respone.text
+    response = model.generate_content(prompt)
+    return response.text

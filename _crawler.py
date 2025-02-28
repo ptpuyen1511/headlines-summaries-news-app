@@ -17,7 +17,7 @@ class FilterURL(object):
         self.confine_prefix = confine       # Limit search to this prefix
         self.exclude_prefixes = exclude     # URL prefixes NOT to visit
 
-        # To remove iamge, video, rss link
+        # To remove image, video, rss link
         self.ignore_exts = { '.png', '.jpg', '.jpeg', '.gif', '.mp3', '.mp4', '.rss', '.pdf', '.css', '.js', '.zip', '.gz'}
 
         # To check if a string is url
@@ -62,7 +62,7 @@ class FilterURL(object):
         return '%s://%s%s' % (obj.scheme, obj.netloc, obj.path)   
 
 
-    # Normaliza url (if url has unicode)
+    # Normalize url (if url has unicode)
     def url_encode(self, url):
         if url is None:
             return None

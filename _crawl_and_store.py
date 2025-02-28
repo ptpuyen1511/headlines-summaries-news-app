@@ -4,6 +4,7 @@ from sqlalchemy import URL, create_engine, text
 import streamlit as st
 from datetime import datetime
 import os
+import time
 
 connection_string = URL.create(
     'postgresql',
@@ -36,8 +37,8 @@ def crawl_each_day(engine):
     # Get all today links
     today_links_dict = get_all_links()
 
-    # Create summamerizer model
-    summarizer_model = create_model('gemini-1.0-pro')
+    # Create summarizer model
+    summarizer_model = create_model('gemini-1.5-pro')
 
     for category in today_links_dict:
         today_links = today_links_dict[category]
@@ -52,7 +53,12 @@ def crawl_each_day(engine):
 
                 # Summarize
                 summarized_text_sample = summarize(summarizer_model, full_text=news_sample['text'])
-            except:
+
+                # Wait to avoid being exceeded the limit (4M tokens per min)
+                time.sleep(30)
+            except Exception as e:
+                os.write(1, f'{e}\n'.encode('utf-8'))
+                
                 os.write(1, f'Error when processing {link}\n'.encode('utf-8'))
                 continue
 
