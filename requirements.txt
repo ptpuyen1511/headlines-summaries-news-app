@@ -2,9 +2,11 @@ streamlit
 numpy
 pandas
 google.generativeai
+google-genai #for keyword extract
 matplotlib
 psycopg2-binary
 sqlalchemy
 beautifulsoup4
 gTTS
 rake-nltk
+pydantic
