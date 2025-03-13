@@ -14,6 +14,8 @@ import subprocess
 import _global_vars
 from _ulogging import do_log
 import _tts
+from _keywords_extract import extract_keywords_gemini
+from annotated_text import annotated_text, annotation
 
 # Connect to DB server ------------------------------------------------------------------------------------------------------------
 connection_string = URL.create(
@@ -150,7 +152,7 @@ def show_full_news(container, news):
     col1.button('🔊 Read this article', key=increase_id_tts_button(), on_click=_tts.speak, args=(news['summary'], col2))
 
     with container:
-        st.markdown(f'<h3 style="text-aling: center; font-size: 20px; color: #002366;">{news["title"]}</h3>', unsafe_allow_html=True)
+        st.markdown(f'<h3 style="text-align: center; font-size: 20px; color: #002366;">{news["title"]}</h3>', unsafe_allow_html=True)
         st.markdown(f'<div style="text-align: right;">Category: {news["category"].title()}</div>', unsafe_allow_html=True)
         st.markdown(get_horizontal_line_style(height=.5, border=.5), unsafe_allow_html=True)
         st.markdown(news['summary'], unsafe_allow_html=True)
@@ -171,17 +173,46 @@ def display_brief_news(container, news):
     container.markdown(f'_By **{news["author"]}** on **{news["date"]} PT**_')
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
+
+# Read database --------------------------------------------------------------------------------------------------------------------
+all_news_df = connect_and_get_data()
+today = datetime.today().date()
+within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['date']].sort_values(by='date', ascending=False)
+
+
+# Trending topics and keywords within a week ---------------------------------------------------------------------------------------
+def extract_keywords(df: pd.DataFrame):
+    list_of_news = [r['summary'] for _, r in df.iterrows()]
+    list_of_news_str = '\n\n'.join(list_of_news)
+    list_keywords = extract_keywords_gemini(list_of_news_str, n_top=25, max_group=5, max_ngram=4)
+    return list_keywords
+
+def display_keywords(container, list_keywords):
+    colors = ['#273E87', '#36454F', '#6F432A', '#950714', '#008080']
+    groups = set(kw.group for kw in list_keywords)
+    group2color = {g: c for g, c in zip(groups, colors)}
+
+    keywords_set = [annotation(kw.keyword, '', background=group2color[kw.group], color='white') for kw in list_keywords]
+
+    with container:
+        # Print trending topics
+        st.markdown('<h5 style="text-align: left; color: #002366;">Trending Topics</h5>', unsafe_allow_html=True)
+
+        topic_container = st.container(border=True)
+        for g in groups:
+            topic_container.markdown(f'<div style="text-align: left; color: {group2color[g]};">{g}</div>', unsafe_allow_html=True)
+
+        # Print top keywords
+        st.markdown('<h5 style="text-align: left; color: #002366;">Trending Keywords</h5>', unsafe_allow_html=True)
+        keyword_container = st.container(border=True)
+        with keyword_container:
+            annotated_text(*keywords_set)
+
 # Page content ---------------------------------------------------------------------------------------------------------------------
 
 # Dashboard Main Panel
 st.markdown('<h2 style="text-align: center; color: white; background-color: #002366;">VNExpress News Summaries</h2>', unsafe_allow_html=True)
 st.write('')
-
-
-# Read database
-all_news_df = connect_and_get_data()
-today = datetime.today().date()
-within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['date']].sort_values(by='date', ascending=False)
 
 
 # News column
@@ -190,7 +221,7 @@ col1, col2 = st.columns([4, 1])
 
 with col1:
     container = st.container(border=False)
-    container.markdown('<h3 style="text-align: left; color: #002366; ">List of News</h4>', unsafe_allow_html=True)
+    container.markdown('<h3 style="text-align: left; color: #002366; ">List of News</h3>', unsafe_allow_html=True)
     container.markdown(get_horizontal_line_style(), unsafe_allow_html=True)
 
     # Search bar
@@ -242,5 +273,9 @@ with col1:
 # Top Keywords column
 with col2:
     container = st.container(border=False)
-    container.markdown('<h3 style="text-align: center; color: #002366;">Top Keywords</h4>', unsafe_allow_html=True)
+    container.markdown('<h3 style="text-align: left; color: #002366;">Keywords</h3>', unsafe_allow_html=True)
     container.markdown("<hr style='margin-top: 0; margin-bottom: 0; height: 1px; border: 1px solid #002366;'><br>", unsafe_allow_html=True)
+
+    list_keywords = extract_keywords(within_a_week_ori_df)
+
+    display_keywords(container, list_keywords)

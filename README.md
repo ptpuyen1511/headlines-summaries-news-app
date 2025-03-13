@@ -13,5 +13,11 @@ My Streamlit-based news application contains summarized news from [e.vnexpress.n
     - [x] Code app with basic features (display news, summarize news, search news, classify news by category): [Headlines Summaries News App (Powered by Streamlit)](https://headlines-summaries-news-app.streamlit.app/)
 - [ ] Step 4: Add some features:
     - [x] TTS
-    - [ ] Trending keywords (in timeframe)
+    - [ ] Top keywords (within a Week)
+        - Methods to extract keywords
+            - RAKE (tested)
+            - KeyBERT (tested)
+            - Gemini API (chose)
+        - Get all news summaries within a week $\to$ cluster them $\to$ extract top keywords from each cluster
+
  
