@@ -9,7 +9,7 @@ My Streamlit-based news application contains summarized news from [e.vnexpress.n
     - Cloud: PostgreSQL or ElasticSearch (choose PostgreSQL on Neon)
 - [x] Step 3: Code app using Streamlit
     - [x] Wireframe
-    ![wireframe](https://raw.githubusercontent.com/ptpuyen1511/headlines-summaries-news-app/main/imgs/wireframe.excalidraw.png)
+    ![wireframe](https://raw.githubusercontent.com/ptpuyen1511/headlines-summaries-news-app/main/imgs/new_wireframe.excalidraw.png)
     - [x] Code app with basic features (display news, summarize news, search news, classify news by category): [Headlines Summaries News App (Powered by Streamlit)](https://headlines-summaries-news-app.streamlit.app/)
 - [x] Step 4: Add some features:
     - [x] TTS
