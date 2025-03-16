@@ -124,11 +124,6 @@ def do_manual_crawl(crawling_state: _global_vars.CrawlingState):
     do_crawl(crawling_state, 'manual')
 
 
-if not _global_vars.initialized:
-    _global_vars.initialized = True
-    th = threading.Thread(target=do_auto_crawl, args=(_global_vars.crawling_state,), daemon=True)
-    th.start()
-
 
 # Utility functions ----------------------------------------------------------------------------------------------------------------
 def get_h5_news_style(text):
@@ -174,25 +169,43 @@ def display_brief_news(container, news):
     container.markdown(row['summary'][:300] + '...', unsafe_allow_html=True)
 
 
-# Read database --------------------------------------------------------------------------------------------------------------------
-all_news_df = connect_and_get_data()
-today = datetime.today().date()
-within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['date']].sort_values(by='date', ascending=False)
-
-
-# Trending topics and keywords within a week ---------------------------------------------------------------------------------------
 def extract_keywords(df: pd.DataFrame):
-    list_of_news = [r['summary'] for _, r in df.iterrows()]
-    list_of_news_str = '\n\n'.join(list_of_news)
-    list_keywords = extract_keywords_gemini(list_of_news_str, n_top=25, max_group=5, max_ngram=4)
-    return list_keywords
+    while True:
+        if _global_vars.trending_kw_cache.is_running:
+            do_log(f'extract_keywords2 is already running, exit now')
+            continue
 
-def display_keywords(container, list_keywords):
+        if _global_vars.trending_kw_cache.get():
+            wait_until_gmt7(_constant.KEYWORDS_EXTRACT_TIME_HOUR, _constant.KEYWORDS_EXTRACT_TIME_MINUTE)
+
+        _global_vars.trending_kw_cache.is_running = True
+        
+        begin_time = get_cur_time_gmt7()
+        do_log(f'Begin extracting trending keyword at {str(begin_time)}, tid is {threading.get_ident()}')
+        # wait_until_gmt7(_constant.CRAWL_TIME_HOUR, _constant.CRAWL_TIME_MINUTE)
+
+        list_of_news = [r['summary'] for _, r in df.iterrows()]
+        list_of_news_str = '\n\n'.join(list_of_news)
+        list_keywords: 'list' = extract_keywords_gemini(list_of_news_str, n_top=25, max_group=5, max_ngram=4)
+        # return list_keywords
+        list_kw2 = [ (kw.keyword, kw.group) for kw in list_keywords ]
+        _global_vars.trending_kw_cache.set(list_kw2)
+
+        stop_time = get_cur_time_gmt7()
+        do_log(f'Done extracting trending keyword at {str(stop_time)}')
+        _global_vars.trending_kw_cache.is_running = False
+
+        time.sleep(90)
+
+
+def display_keywords(container):
+    list_keywords = _global_vars.trending_kw_cache.get()
+
     colors = ['#273E87', '#36454F', '#6F432A', '#950714', '#008080']
-    groups = set(kw.group for kw in list_keywords)
+    groups = set(kw[1] for kw in list_keywords)
     group2color = {g: c for g, c in zip(groups, colors)}
 
-    keywords_set = [annotation(kw.keyword, '', background=group2color[kw.group], color='white') for kw in list_keywords]
+    keywords_set = [annotation(kw[0], '', background=group2color[kw[1]], color='white') for kw in list_keywords]
 
     with container:
         # Print trending topics
@@ -207,6 +220,24 @@ def display_keywords(container, list_keywords):
         keyword_container = st.container(border=True)
         with keyword_container:
             annotated_text(*keywords_set)
+
+# Read database --------------------------------------------------------------------------------------------------------------------
+all_news_df = connect_and_get_data()
+today = datetime.today().date()
+within_a_week_ori_df = all_news_df[today - timedelta(days=7) <= all_news_df['date']].sort_values(by='date', ascending=False)
+
+# Init thread --------------------------------------------------------------------------------------------------------------------
+if not _global_vars.initialized:
+    do_log('App is starting...')
+
+    _global_vars.initialized = True
+    
+    th_auto_crawl = threading.Thread(target=do_auto_crawl, args=(_global_vars.crawling_state,), daemon=True)
+    th_auto_crawl.start()
+
+    th_extract_trend_kw = threading.Thread(target=extract_keywords, args=(within_a_week_ori_df,), daemon=True)
+    th_extract_trend_kw.start()
+
 
 # Page content ---------------------------------------------------------------------------------------------------------------------
 
@@ -276,6 +307,7 @@ with col2:
     container.markdown('<h3 style="text-align: left; color: #002366;">Keywords</h3>', unsafe_allow_html=True)
     container.markdown("<hr style='margin-top: 0; margin-bottom: 0; height: 1px; border: 1px solid #002366;'><br>", unsafe_allow_html=True)
 
-    list_keywords = extract_keywords(within_a_week_ori_df)
+    # list_keywords = extract_keywords(within_a_week_ori_df)
+    # display_keywords(container, list_keywords)
 
-    display_keywords(container, list_keywords)
+    display_keywords(container)
